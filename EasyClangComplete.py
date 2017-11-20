@@ -226,8 +226,13 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
         # As the plugin has just loaded, we might have missed an activation
         # event for the active view so completion will not work for it until
-        # re-activated. Force active view initialization in that case.
-        self.on_activated_async(sublime.active_window().active_view())
+        # re-activated. Force active view initialization in that case. Wait some
+        # time to allow other plugins to do their work (e.g. setting environment
+        # variables).
+        sublime.set_timeout_async(
+            lambda: self.on_activated_async(
+                sublime.active_window().active_view()),
+            100)
 
     def on_settings_changed(self):
         """Call when any of the settings changes."""
