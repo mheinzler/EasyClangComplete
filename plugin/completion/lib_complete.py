@@ -6,6 +6,7 @@ Attributes:
     log (logging.Logger): logger for this module.
 """
 import importlib
+import re
 import sublime
 import time
 import logging
@@ -419,10 +420,10 @@ class Completer(BaseCompleter):
                 self.place_holders = 1
 
                 # parse the given string and add it to the completions
-                self.parse_string(string)
-                completions.append([
-                    self.trigger + "\t" + self.hint,
-                    self.contents])
+                if self.parse_string(string):
+                    completions.append([
+                        self.trigger + "\t" + self.hint,
+                        self.contents])
 
             def parse_string(self, string):
                 for chunk in string:
@@ -431,7 +432,8 @@ class Completer(BaseCompleter):
                     if not chunk.spelling:
                         if chunk.isKindOptional() and chunk.string:
                             # add the optional chunks recursively
-                            self.parse_string(chunk.string)
+                            if not self.parse_string(chunk.string):
+                                return False
 
                         continue
 
@@ -441,6 +443,8 @@ class Completer(BaseCompleter):
                         continue
                     self.hint += spelling
                     if chunk.isKindTypedText():
+                        if re.match(r"\boperator\b", spelling):
+                            return False
                         self.trigger += spelling
                     if chunk.isKindResultType():
                         self.hint += ' '
@@ -453,6 +457,8 @@ class Completer(BaseCompleter):
                         self.place_holders += 1
                     else:
                         self.contents += spelling
+
+                return True
 
         # sort results according to their clang based priority
         sorted_results = sorted(complete_results.results,
