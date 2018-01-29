@@ -203,7 +203,6 @@ class Popup:
                                              code=cursor.brief_comment))
         if cursor.raw_comment:
             clean_comment = Popup.cleanup_comment(cursor.raw_comment).strip()
-            print(clean_comment)
             if clean_comment:
                 # Only add this if there is a Doxygen comment.
                 popup.__text += FULL_DOC_TEMPLATE.format(
