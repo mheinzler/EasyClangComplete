@@ -32,8 +32,7 @@ class ModuleReloader:
         """Reload all modules once."""
         try_counter = 0
         try:
-            modules = sys.modules.copy()
-            for name, module in modules.items():
+            for name, module in sys.modules.items():
                 if name.startswith(prefix) and ignore_string not in name:
                     log.debug("Reloading module: '%s'", name)
                     imp.reload(module)
