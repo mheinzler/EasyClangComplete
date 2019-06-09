@@ -28,6 +28,9 @@ GLOBAL_TRIGGERS = [":", "\t", " "]
 # All symbols that can be part of a valid trigger.
 ALLOWED_TRIGGER_SYMBOLS = [":", " ", "\t", ".", "-", ">"]
 
+# this removes left over commas before a bracket when a filter has removed a
+# parameter in a completion
+COMPLETION_CLEANUP = re.compile(r", (?=[\)>])")
 
 class Completer(BaseCompleter):
     """Encapsulates completions based on libclang.
@@ -421,9 +424,10 @@ class Completer(BaseCompleter):
 
                 # parse the given string and add it to the completions
                 if self.parse_string(string):
-                    completions.append([
-                        self.trigger + "\t" + self.hint,
-                        self.contents])
+                    hint = re.sub(COMPLETION_CLEANUP, "", self.hint)
+                    contents = re.sub(COMPLETION_CLEANUP, "", self.contents)
+
+                    completions.append([self.trigger + "\t" + hint, contents])
 
             def parse_string(self, string):
                 for chunk in string:
