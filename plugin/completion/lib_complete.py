@@ -411,6 +411,49 @@ class Completer(BaseCompleter):
         """
         completions = []
 
+        class Parser:
+            def __init__(self, string):
+                self.hint = ''
+                self.contents = ''
+                self.trigger = ''
+                self.place_holders = 1
+
+                # parse the given string and add it to the completions
+                self.parse_string(string)
+                completions.append([
+                    self.trigger + "\t" + self.hint,
+                    self.contents])
+
+            def parse_string(self, string):
+                for chunk in string:
+                    if not chunk:
+                        continue
+                    if not chunk.spelling:
+                        if chunk.isKindOptional() and chunk.string:
+                            # add the optional chunks recursively
+                            self.parse_string(chunk.string)
+
+                        continue
+
+                    spelling = Tools.filter_spelling(
+                        chunk.spelling, settings.spelling_filters)
+                    if not spelling:
+                        continue
+                    self.hint += spelling
+                    if chunk.isKindTypedText():
+                        self.trigger += spelling
+                    if chunk.isKindResultType():
+                        self.hint += ' '
+                        continue
+                    if chunk.isKindInformative():
+                        continue
+                    if chunk.isKindPlaceHolder():
+                        self.contents += ('${' + str(self.place_holders) +
+                                          ':' + spelling + '}')
+                        self.place_holders += 1
+                    else:
+                        self.contents += spelling
+
         # sort results according to their clang based priority
         sorted_results = sorted(complete_results.results,
                                 key=lambda x: x.string.priority)
@@ -418,34 +461,7 @@ class Completer(BaseCompleter):
         for c in sorted_results:
             if not Completer._is_valid_result(c, excluded):
                 continue
-            hint = ''
-            contents = ''
-            trigger = ''
-            place_holders = 1
-            for chunk in c.string:
-                if not chunk:
-                    continue
-                if not chunk.spelling:
-                    continue
-                spelling = Tools.filter_spelling(
-                    chunk.spelling, settings.spelling_filters)
-                if not spelling:
-                    continue
-                hint += spelling
-                if chunk.isKindTypedText():
-                    trigger += spelling
-                if chunk.isKindResultType():
-                    hint += ' '
-                    continue
-                if chunk.isKindOptional():
-                    continue
-                if chunk.isKindInformative():
-                    continue
-                if chunk.isKindPlaceHolder():
-                    contents += ('${' + str(place_holders) + ':' +
-                                 spelling + '}')
-                    place_holders += 1
-                else:
-                    contents += spelling
-            completions.append([trigger + "\t" + hint, contents])
+
+            Parser(c.string)
+
         return completions
