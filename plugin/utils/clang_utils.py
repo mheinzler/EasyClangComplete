@@ -248,8 +248,8 @@ class ClangUtils:
                         libclang_dir, libclang_filename)
                     log.debug("Checking path: %s", full_libclang_path)
                     if path.exists(full_libclang_path):
-                        log.info("Found libclang library file: '%s'",
-                                 full_libclang_path)
+                        log.debug("Found libclang library file: '%s'",
+                                  full_libclang_path)
                         return libclang_dir, full_libclang_path
                 log.debug("Clang could not find '%s'", full_libclang_path)
         # if we haven't found anything there is nothing to return
@@ -271,7 +271,7 @@ class ClangUtils:
             at all.
         """
         check_version_cmd = [clang_binary, "-v"]
-        log.info("Getting version from command: `%s`",
+        log.debug("Getting version from command: `%s`",
                  " ".join(check_version_cmd))
         output_text = Tools.run_command(check_version_cmd)
 

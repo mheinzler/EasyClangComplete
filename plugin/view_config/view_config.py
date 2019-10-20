@@ -339,14 +339,14 @@ class ViewConfig(object):
 
         completer = None
         if settings.use_libclang:
-            log.info("init completer based on libclang")
+            log.debug("init completer based on libclang")
             completer = lib_complete.Completer(settings, error_vis)
             if not completer.valid:
                 log.error("cannot initialize completer with libclang.")
                 log.info("falling back to using clang in a subprocess.")
                 completer = None
         if not completer:
-            log.info("init completer based on clang from cmd")
+            log.debug("init completer based on clang from cmd")
             completer = bin_complete.Completer(settings, error_vis)
         return completer
 

@@ -145,7 +145,7 @@ class SettingsStorage:
         try:
             # Init current and parent folders.
             if not SublBridge.is_valid_view(view):
-                log.error("no view to populate common flags from")
+                log.debug("no view to populate common flags from")
                 return
             self.__load_vars_from_settings(view.settings(),
                                            project_specific=True)
